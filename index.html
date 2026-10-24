@@ -142,7 +142,7 @@ bush(W*0.88);
 persephone(px,fy,bob,phase==='give');
 artemis(ax,fy,bob);
 petalsDraw();
-if(phase==='walk'){if(!sub)setSub('Яблони в цвету. Высотка смотрит сверху.');if(t>7){phase='meet';meetT=t;bushExitPlayed=false;shush(0.5,2600,0.12);}}else if(phase==='meet'){if(giveReq){phase='give';giveT=t;setSub('Персефона отдала гранат. Без слов.');}}else if(phase==='give'){if(t-giveT>1.6){phase='run';runT=t;setSub('Знаки принимают.');shush(0.25,1800,0.18);}}else if(phase==='run'){if(t-runT>2.0&&!bushExitPlayed){bushExitPlayed=true;shush(0.5,2600,0.12);}if(t-runT>2.6){phase='end';setSub('Знак приняли. И снова в путь.');}}
+if(phase==='walk'){if(!sub)setSub('Яблони в цвету. Высотка смотрит сверху.');if(t>7){phase='meet';meetT=t;bushExitPlayed=false;shush(0.5,2600,0.12);}}else if(phase==='meet'){if(giveReq){phase='give';giveT=t;setSub('Персефона отдала гранат. Без слов.');}}else if(phase==='give'){if(t-giveT>1.6){phase='run';runT=t;shush(0.25,1800,0.18);}}else if(phase==='run'){if(t-runT>2.0&&!bushExitPlayed){bushExitPlayed=true;shush(0.5,2600,0.12);}if(t-runT>2.6){phase='end';setSub('Знак приняли. И снова в путь.');}}
 drawCaptions();requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
 </script>
