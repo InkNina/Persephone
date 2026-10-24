@@ -23,147 +23,154 @@ window.addEventListener('resize',resize);resize();
 
 var PI2=Math.PI*2;
 var t=0,last=performance.now();
-var SHOTS=[{a:0.8,b:5.5},{a:6.2,b:11.5},{a:12.2,b:17.0},{a:17.7,b:23.0}];
-var FADE=0.7,END=24.5;
-var breathPlayed=false,windOn=false;
+var SHOTS=[{a:0.8,b:5.8},{a:6.5,b:10.5},{a:11.2,b:14.7},{a:15.4,b:21.0}];
+var FADE=0.7,END=22.5;
+var WARM='#d8b87a',COLD='#c9c2a8',POME='#9e2b2b';
 
-// тёмные частицы земли
-var dust=[];for(var i=0;i<50;i++)dust.push({nx:Math.random(),ny:Math.random(),vy:0.0018+Math.random()*0.003,rn:0.001+Math.random()*0.002,a:Math.random()*PI2});
-function newDust(){return{nx:Math.random(),ny:-0.03,vy:0.0018+Math.random()*0.003,rn:0.001+Math.random()*0.002,a:Math.random()*PI2};}
+var crumbs=[];for(var i=0;i<40;i++)crumbs.push({nx:Math.random(),ny:0.7+Math.random()*0.3,vx:0,vy:0,rn:0.004+Math.random()*0.006,live:0});
+var petals=[];for(var j=0;j<70;j++)petals.push(newPetal(true));
+function newPetal(rand){return{nx:Math.random(),ny:rand?Math.random():-0.03,vx:(Math.random()-0.5)*0.0009,vy:0.0009+Math.random()*0.0016,rn:0.0014+Math.random()*0.0026,a:Math.random()*PI2,va:(Math.random()-0.5)*0.05};}
+var clods=[];for(var c=0;c<7;c++)clods.push({nx:0.2+Math.random()*0.6,ny:0.82+Math.random()*0.12,rn:0.02+Math.random()*0.03,a:1});
 
-// звук
-var AC=window.AudioContext||window.webkitAudioContext,actx=null,earthG=null,started=false;
+var AC=window.AudioContext||window.webkitAudioContext,actx=null,earthG=null,started=false,windOn=false,breathPlayed=false,scrapedIdx=-1;
 function noiseBuf(sec){var n=Math.floor(actx.sampleRate*sec),b=actx.createBuffer(1,n,actx.sampleRate),d=b.getChannelData(0);for(var i=0;i<n;i++)d[i]=Math.random()*2-1;return b;}
-function startEarth(){var s=actx.createBufferSource();s.buffer=noiseBuf(2);s.loop=true;var f=actx.createBiquadFilter();f.type='lowpass';f.frequency.value=170;earthG=actx.createGain();earthG.gain.value=0.06;s.connect(f);f.connect(earthG);earthG.connect(actx.destination);s.start();}
-function startWind(){if(windOn)return;windOn=true;var s=actx.createBufferSource();s.buffer=noiseBuf(2);s.loop=true;var f=actx.createBiquadFilter();f.type='lowpass';f.frequency.value=300;var g=actx.createGain();g.gain.value=0.04;s.connect(f);f.connect(g);g.connect(actx.destination);s.start();}
-function rootSnap(){if(!actx)return;var s=actx.createBufferSource();s.buffer=noiseBuf(0.06);var f=actx.createBiquadFilter();f.type='bandpass';f.frequency.value=1400+Math.random()*800;var g=actx.createGain();g.gain.setValueAtTime(0.0001,actx.currentTime);g.gain.linearRampToValueAtTime(0.18,actx.currentTime+0.004);g.gain.linearRampToValueAtTime(0.0001,actx.currentTime+0.06);s.connect(f);f.connect(g);g.connect(actx.destination);s.start();}
-function breath(){if(!actx)return;var s=actx.createBufferSource();s.buffer=noiseBuf(0.5);var f=actx.createBiquadFilter();f.type='bandpass';f.frequency.value=500;var g=actx.createGain();g.gain.setValueAtTime(0.0001,actx.currentTime);g.gain.linearRampToValueAtTime(0.22,actx.currentTime+0.12);g.gain.linearRampToValueAtTime(0.0001,actx.currentTime+0.5);s.connect(f);f.connect(g);g.connect(actx.destination);s.start();}
-function wake(){if(started)return;started=true;try{actx=new AC();if(actx.state==='suspended')actx.resume();startEarth();}catch(e){}wakeEl.classList.add('gone');}
+function startEarth(){var s=actx.createBufferSource();s.buffer=noiseBuf(2);s.loop=true;var f=actx.createBiquadFilter();f.type='lowpass';f.frequency.value=150;earthG=actx.createGain();earthG.gain.value=0.05;s.connect(f);f.connect(earthG);earthG.connect(actx.destination);s.start();}
+function startWind(){if(windOn)return;windOn=true;var s=actx.createBufferSource();s.buffer=noiseBuf(2);s.loop=true;var f=actx.createBiquadFilter();f.type='lowpass';f.frequency.value=300;var g=actx.createGain();g.gain.value=0.0;s.connect(f);f.connect(g);g.connect(actx.destination);s.start();return g;}
+var windG=null;
+function scrape(){if(!actx)return;var s=actx.createBufferSource();s.buffer=noiseBuf(0.10);var f=actx.createBiquadFilter();f.type='bandpass';f.frequency.value=900+Math.random()*500;var g=actx.createGain();g.gain.setValueAtTime(0.0001,actx.currentTime);g.gain.linearRampToValueAtTime(0.22,actx.currentTime+0.006);g.gain.linearRampToValueAtTime(0.0001,actx.currentTime+0.10);s.connect(f);f.connect(g);g.connect(actx.destination);s.start();}
+function breath(){if(!actx)return;var s=actx.createBufferSource();s.buffer=noiseBuf(0.6);var f=actx.createBiquadFilter();f.type='bandpass';f.frequency.value=480;var g=actx.createGain();g.gain.setValueAtTime(0.0001,actx.currentTime);g.gain.linearRampToValueAtTime(0.20,actx.currentTime+0.14);g.gain.linearRampToValueAtTime(0.0001,actx.currentTime+0.6);s.connect(f);f.connect(g);g.connect(actx.destination);s.start();}
+function wake(){if(started)return;started=true;try{actx=new AC();if(actx.state==='suspended')actx.resume();startEarth();windG=startWind();}catch(e){}wakeEl.classList.add('gone');}
 window.addEventListener('click',wake);
 window.addEventListener('touchstart',function(){wake();},{passive:true});
 
 function ln(x1,y1,x2,y2,w,col){ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
 function ci(x,y,r,col){ctx.fillStyle=col;ctx.beginPath();ctx.arc(x,y,r,0,PI2);ctx.fill();}
 
-// рука: ладонь-овал + пальцы. open=веер вверх, fist=кулак, gr=гранат в кулаке
-function arm(x,y,ang,len,skin,mode){
-  ctx.save();ctx.translate(x,y);ctx.rotate(ang);
-  var pw=len*0.22,ph=len*0.34;
-  ctx.fillStyle=skin;ctx.beginPath();ctx.ellipse(0,0,pw,ph,0,0,PI2);ctx.fill();
-  ctx.strokeStyle='rgba(0,0,0,0.18)';ctx.lineWidth=1.2*DPR;ctx.stroke();
-  if(mode==='open'){
-    for(var i=0;i<5;i++){var a=-0.5+i*0.25;ln(0,-ph*0.6,Math.sin(a)*len*0.5,-ph*0.6-Math.cos(a)*len*0.55,len*0.07,skin);}
-  }else{
-    // кулак: фаланги дугами
-    for(var j=0;j<4;j++){ctx.beginPath();ctx.arc(-pw*0.5+j*pw*0.34,-ph*0.2,pw*0.2,Math.PI,0);ctx.fillStyle=skin;ctx.fill();ctx.strokeStyle='rgba(0,0,0,0.15)';ctx.lineWidth=1*DPR;ctx.stroke();}
-    if(mode==='gr'){ci(0,ph*0.1,len*0.26,'#9e2b2b');ctx.fillStyle='#7a1f1f';ctx.fillRect(-len*0.06,ph*0.1-len*0.34,len*0.12,len*0.1);}
-  }
-  ctx.restore();
+function hand(cx,cy,ang,sc,col,pose){
+ ctx.save();ctx.translate(cx,cy);ctx.rotate(ang);
+ ctx.fillStyle=col;ctx.strokeStyle=col;ctx.lineCap='round';ctx.lineJoin='round';
+ ctx.beginPath();ctx.ellipse(0,0,sc*0.26,sc*0.40,0,0,PI2);ctx.fill();
+ var f=[],i;
+ if(pose==='grab'){
+  for(i=0;i<4;i++)f.push([-sc*0.18+i*sc*0.12,sc*0.34,Math.PI/2+(i-1.5)*0.12,sc*0.30,0.9,sc*0.16]);
+  f.push([sc*0.24,sc*0.05,0.2,sc*0.22,0.6,sc*0.12]);
+ }else if(pose==='open'){
+  for(i=0;i<4;i++)f.push([-sc*0.18+i*sc*0.12,-sc*0.34,-Math.PI/2+(i-1.5)*0.22,sc*0.34,0,0]);
+  f.push([-sc*0.26,sc*0.02,Math.PI+0.5,sc*0.24,0,0]);
+ }else if(pose==='cover'){
+  for(i=0;i<4;i++)f.push([sc*0.22,-sc*0.12+i*sc*0.09,0,sc*0.34,0,0]);
+  f.push([sc*0.10,sc*0.20,0.5,sc*0.20,0,0]);
+ }else if(pose==='fist'){
+  for(i=0;i<4;i++){ctx.beginPath();ctx.arc(-sc*0.16+i*sc*0.11,sc*0.10,sc*0.10,Math.PI,0);ctx.fill();}
+  ctx.beginPath();ctx.arc(sc*0.20,0,sc*0.09,Math.PI*1.2,Math.PI*2.2);ctx.fill();
+ }
+ ctx.lineWidth=sc*0.10;
+ for(var k=0;k<f.length;k++){var p=f[k];var x0=p[0],y0=p[1];var x1=x0+Math.cos(p[2])*p[3];var y1=y0+Math.sin(p[2])*p[3];ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);if(p[5]>0){var x2=x1+Math.cos(p[2]+p[4])*p[5];var y2=y1+Math.sin(p[2]+p[4])*p[5];ctx.lineTo(x2,y2);}ctx.stroke();}
+ ctx.restore();
 }
 function moon(x,y,r){ctx.strokeStyle='#cfd6da';ctx.lineWidth=1.6*DPR;ctx.beginPath();ctx.arc(x,y,r,0.5,5.8);ctx.stroke();}
 
-function earthBG(){
-  var g=ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,'#1a140e');g.addColorStop(0.5,'#241a12');g.addColorStop(1,'#0c0805');
-  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-  // мерцание грунта
-  ctx.fillStyle='rgba(60,45,30,'+(0.05+0.04*Math.sin(t*3))+')';ctx.fillRect(0,0,W,H);
-}
-function topLight(k){ // k 0..1 сила света сверху
-  if(k<=0)return;
-  var g=ctx.createLinearGradient(0,0,0,H*0.6);
-  g.addColorStop(0,'rgba(190,200,210,'+(0.5*k)+')');g.addColorStop(1,'rgba(190,200,210,0)');
-  ctx.fillStyle=g;ctx.fillRect(0,0,W,H*0.6);
-}
-function dustDraw(active){
-  if(!active)return;
-  for(var k=0;k<dust.length;k++){var p=dust[k];p.ny+=p.vy;p.a+=0.04;if(p.ny>1.05){dust[k]=newDust();continue;}
-    ctx.save();ctx.translate(p.nx*W,p.ny*H);ctx.rotate(p.a);ctx.fillStyle='rgba(40,30,20,0.7)';ctx.beginPath();ctx.ellipse(0,0,p.rn*H*1.4,p.rn*H,0,0,PI2);ctx.fill();ctx.restore();}
-}
-function roots(x,y,n,seed){for(var i=0;i<n;i++){var a=seed+i*1.7;ln(x,y,x+Math.cos(a)*U*0.12,y+Math.sin(a)*U*0.1,U*0.004,'#3a2a1a');}}
+function earthDark(){var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#120c07');g.addColorStop(0.6,'#1c130b');g.addColorStop(1,'#0a0603');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+function soilBand(){ctx.fillStyle='#241812';ctx.fillRect(0,H*0.78,W,H*0.22);for(var i=0;i<clods.length;i++){var o=clods[i];if(o.a<=0)continue;ci(o.nx*W,o.ny*H,o.rn*U*o.a,'#3a281a');}}
+function crumbSpawn(x,y,n){for(var i=0;i<n;i++){var p=crumbs[Math.floor(Math.random()*crumbs.length)];p.nx=x/W+(Math.random()-0.5)*0.04;p.ny=y/H;p.vx=(Math.random()-0.5)*0.002;p.vy=0.002+Math.random()*0.003;p.live=1;}}
+function crumbDraw(){for(var i=0;i<crumbs.length;i++){var p=crumbs[i];if(p.live<=0)continue;p.nx+=p.vx;p.ny+=p.vy;p.live-=0.02;if(p.ny>1.05)p.live=0;ctx.fillStyle='rgba(50,35,22,'+(p.live*0.8)+')';ci(p.nx*W,p.ny*H,p.rn*U*0.5,'rgba(50,35,22,'+(p.live*0.8)+')');}}
+
+function morningSky(){var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#9fb0bc');g.addColorStop(0.5,'#c4c8c2');g.addColorStop(1,'#dcd6c8');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+function tree(x,sc,sd){var y=H*0.74,tr=U*0.15*sc;ctx.strokeStyle='#5b4a39';ctx.lineWidth=3*sc*DPR;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y-tr);ctx.stroke();for(var i=0;i<7;i++){var a=sd+i,rr=tr*(0.5+0.3*Math.sin(a*3));ci(x+Math.cos(a)*rr*0.9,y-tr+Math.sin(a*1.3)*rr*0.5,tr*0.42,'rgba(245,238,228,0.95)');}for(var j=0;j<9;j++){var b=sd*2+j;ci(x+Math.cos(b)*tr*0.7,y-tr+Math.sin(b)*tr*0.4,tr*0.12,'rgba(240,208,214,0.6)');}}
+function petalDraw(){for(var k=0;k<petals.length;k++){var p=petals[k];p.nx+=p.vx;p.ny+=p.vy;p.a+=p.va;if(p.ny>1.05){petals[k]=newPetal(false);continue;}ctx.save();ctx.translate(p.nx*W,p.ny*H);ctx.rotate(p.a);ctx.fillStyle='rgba(247,240,232,0.9)';ctx.beginPath();ctx.ellipse(0,0,p.rn*H*1.6,p.rn*H,0,0,PI2);ctx.fill();ctx.restore();}}
 
 function drawShot1(tl){
-  var cx=W*0.5,sw=Math.sin(tl*7)*U*0.02;
-  // корни рвутся
-  roots(cx-U*0.18,H*0.5,4,1.2);roots(cx+U*0.18,H*0.55,4,3.4);
-  // две руки сверху скребут вниз
-  arm(cx-U*0.16,H*0.30+sw,0.15,U*0.30,'#cdb59a','open');
-  arm(cx+U*0.16,H*0.32-sw,-0.15,U*0.30,'#cdb59a','open');
-  moon(cx-U*0.16,H*0.30+sw+U*0.16,U*0.02);
-  dustDraw(true);
+ earthDark();soilBand();
+ var cyc=1.25,idx=Math.floor(tl/cyc),ph=(tl%cyc)/cyc,active=idx%2;
+ var swing=Math.sin(ph*Math.PI);
+ var gy=H*0.80;
+ if(active===0){
+  var lx=W*0.34,ly=gy-U*0.10-swing*U*0.06;
+  hand(lx,ly,0.10+swing*0.25,U*0.30,WARM,'grab');
+  moon(lx,ly+U*0.16,U*0.02);
+  if(ph>0.55&&ph<0.7)crumbSpawn(lx,gy,3);
+ }else{
+  var rx=W*0.66,rY=gy-U*0.10-swing*U*0.06;
+  hand(rx,rY,-0.10-swing*0.25,U*0.30,WARM,'grab');
+  if(ph>0.55&&ph<0.7)crumbSpawn(rx,gy,3);
+ }
+ if(ph>0.55&&scrapedIdx!==idx){scrape();scrapedIdx=idx;for(var i=0;i<clods.length;i++){var o=clods[i];if(o.ny>0.84)o.a=Math.max(0,o.a-0.18);}}
+ crumbDraw();
 }
 function drawShot2(tl){
-  var cx=W*0.5,drift=Math.sin(tl*1.5)*U*0.01;
-  // тянущаяся рука снизу вверх, растопырена, пуста
-  arm(cx-U*0.12,H*0.78-drift,-0.1,U*0.34,'#d8c3a8','open');
-  // сжимающаяся рука с гранатом, дрожит
-  var jq=Math.sin(tl*9)*U*0.004;
-  arm(cx+U*0.10+jq,H*0.52,0.2,U*0.30,'#c9b294','gr');
-  dustDraw(false);
+ earthDark();
+ var drift=Math.sin(tl*1.2)*U*0.008;
+ // холодные скрещены внизу: гранатная ниже, свободная поверх
+ hand(W*0.40,H*0.70+drift,0.05,U*0.30,COLD,'fist');
+ ci(W*0.40+U*0.06,H*0.70+drift+U*0.02,U*0.05,POME);
+ hand(W*0.52,H*0.62-drift,-0.12,U*0.30,COLD,'open');
+ // тёплая сверху вниз накрывает свободную
+ var low=Math.min(1,tl/1.6);
+ hand(W*0.62,H*0.18+low*U*0.34,Math.PI*0.62,U*0.30,WARM,'cover');
+ moon(W*0.62+U*0.10,H*0.18+low*U*0.34,U*0.02);
 }
 function drawShot3(tl){
-  var cx=W*0.5,rise=tl*U*0.02;
-  topLight(0.25);
-  // руки Артемиды сверху хватают и поднимают
-  arm(cx-U*0.14,H*0.22-rise,0.2,U*0.26,'#e0cbb0','open');
-  arm(cx+U*0.14,H*0.24-rise,-0.2,U*0.26,'#e0cbb0','open');
-  moon(cx-U*0.14,H*0.22-rise+U*0.14,U*0.02);
-  // тянущаяся обвисает (пальцы сгибаются -> рисуем кулачком без граната)
-  arm(cx-U*0.10,H*0.62-rise,0.05,U*0.30,'#d8c3a8','fist');
-  // сжимающаяся с гранатом натягивается к центру
-  arm(cx+U*0.08,H*0.50-rise,0.1,U*0.32,'#c9b294','gr');
-  dustDraw(true);
+ earthDark();
+ var rise=tl*U*0.03;
+ // гранатная остаётся снизу сжатая
+ hand(W*0.42,H*0.78,0.05,U*0.28,COLD,'fist');
+ ci(W*0.42+U*0.05,H*0.78+U*0.02,U*0.045,POME);
+ // свободная вытянута вверх, её тянут
+ hand(W*0.55,H*0.50-rise,-0.1,U*0.30,COLD,'open');
+ // тёплая сверху держит и тянет
+ hand(W*0.55+U*0.02,H*0.30-rise,Math.PI*0.55,U*0.28,WARM,'cover');
+ moon(W*0.55+U*0.12,H*0.30-rise,U*0.02);
+ topGlow(0.2+tl*0.05);
 }
+function topGlow(k){if(k<=0)return;var g=ctx.createLinearGradient(0,0,0,H*0.5);g.addColorStop(0,'rgba(180,190,200,'+(0.4*k)+')');g.addColorStop(1,'rgba(180,190,200,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H*0.5);}
+
 function drawShot4(tl){
-  var cx=W*0.5;
-  topLight(0.7+0.2*Math.sin(tl*2));
-  // силуэт сидящей Персефоны: куртка + бини
-  ctx.fillStyle='#2c2c31';ctx.beginPath();
-  ctx.moveTo(cx-U*0.10,H*0.86);ctx.lineTo(cx+U*0.10,H*0.86);ctx.lineTo(cx+U*0.07,H*0.52);ctx.lineTo(cx-U*0.07,H*0.52);ctx.closePath();ctx.fill();
-  // лицо всплывает
-  ci(cx,H*0.46,U*0.05,'#d8b89a');
-  ctx.fillStyle='#241d1a';ctx.beginPath();ctx.arc(cx,H*0.44,U*0.055,Math.PI,0);ctx.fill();
-  ctx.fillStyle='#2c2c31';ctx.fillRect(cx-U*0.055,H*0.43,U*0.11,U*0.02); // бини
-  // глаза приоткрываются на вдохе
-  var ek=Math.min(1,tl/1.2);
-  ctx.strokeStyle='#241d1a';ctx.lineWidth=1.4*DPR;
-  ctx.beginPath();ctx.moveTo(cx-U*0.025,H*0.46);ctx.lineTo(cx-U*0.008,H*0.46);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(cx+U*0.008,H*0.46);ctx.lineTo(cx+U*0.025,H*0.46);ctx.stroke();
-  if(ek>0.5){ctx.fillStyle='#241d1a';ci(cx-U*0.016,H*0.46,U*0.004*ek,'#241d1a');ci(cx+U*0.016,H*0.46,U*0.004*ek,'#241d1a');}
-  // Артемида на коленях держит за плечо (рука сбоку)
-  ctx.fillStyle='#6f6a4f';ctx.beginPath();ctx.moveTo(cx-U*0.22,H*0.86);ctx.lineTo(cx-U*0.10,H*0.86);ctx.lineTo(cx-U*0.12,H*0.58);ctx.lineTo(cx-U*0.20,H*0.58);ctx.closePath();ctx.fill();
-  arm(cx-U*0.11,H*0.56,-0.6,U*0.16,'#e0cbb0','open');
-  // гранат прижат к груди, пальцы дёргаются: сжимаются-пытаются разжаться-сжимаются
-  var squeeze=0.5+0.5*Math.abs(Math.sin(tl*2.2));
-  var jq=(1-squeeze)*U*0.012;
-  arm(cx+U*0.02+jq,H*0.60,0.1,U*0.22*(0.9+0.1*squeeze),'#c9b294','gr');
-  dustDraw(true);
+ morningSky();
+ tree(W*0.12,1.0,1.2);tree(W*0.30,1.05,2.9);tree(W*0.70,0.95,4.4);tree(W*0.92,1.1,3.7);
+ ctx.fillStyle='#3a2c20';ctx.fillRect(0,H*0.80,W,H*0.20);
+ petalDraw();
+ var s=U*0.0026,fy=H*0.80;
+ // Артемида слева
+ var ax=W*0.42;
+ ctx.fillStyle='#6f6a4f';ctx.beginPath();ctx.moveTo(ax-26*s,fy-150*s+10*s);ctx.lineTo(ax+26*s,fy-150*s+10*s);ctx.lineTo(ax+20*s,fy);ctx.lineTo(ax-20*s,fy);ctx.closePath();ctx.fill();
+ ci(ax,fy-168*s,16*s,'#d8b89a');ctx.fillStyle='#d9c98f';ctx.beginPath();ctx.arc(ax,fy-172*s,17*s,Math.PI,0);ctx.fill();
+ moon(ax,fy-132*s,5*s);
+ // рука Артемиды на плече Персефоны (обнимает)
+ hand(ax+30*s,fy-120*s,-0.5,18*s,WARM,'cover');
+ // Персефона справа, наклонена к Артемиде
+ var px=W*0.56,tilt=-0.12;
+ ctx.save();ctx.translate(px,fy);ctx.rotate(tilt);
+ ctx.fillStyle='#3a3a40';ctx.beginPath();ctx.moveTo(-25*s,-148*s+10*s);ctx.lineTo(25*s,-148*s+10*s);ctx.lineTo(19*s,0);ctx.lineTo(-19*s,0);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#241d1a';ctx.beginPath();ctx.arc(0,-166*s,17*s,0,PI2);ctx.fill();
+ ci(0,-166*s,14*s,'#d8c3a8');
+ ctx.fillStyle='#2c2c31';ctx.beginPath();ctx.arc(0,-172*s,16*s,Math.PI,0);ctx.fill();ctx.fillRect(-16*s,-174*s,32*s,6*s);
+ ctx.fillStyle='#9aa07a';ctx.fillRect(4*s,-172*s,7*s,7*s);
+ // сжатая рука с гранатом у груди — не разжимается
+ hand(14*s,-96*s,0.3,16*s,COLD,'fist');
+ ci(20*s,-92*s,7*s,POME);
+ ctx.restore();
 }
 
-function fadeAlpha(){
-  for(var i=0;i<SHOTS.length;i++){var s=SHOTS[i];
-    if(t>=s.a&&t<=s.b){var tin=Math.min(1,(t-s.a)/FADE),tout=Math.min(1,(s.b-t)/FADE);return 1-Math.min(tin,tout);}
-  }
-  return 1; // между шотами и после конца — чёрный
-}
+function fadeAlpha(){for(var i=0;i<SHOTS.length;i++){var s=SHOTS[i];if(t>=s.a&&t<=s.b){var tin=Math.min(1,(t-s.a)/FADE),tout=Math.min(1,(s.b-t)/FADE);return 1-Math.min(tin,tout);}}return 1;}
 
 function frame(now){
-  var dt=Math.min(0.05,(now-last)/1000);last=now;t+=dt;
-  if(t>4&&!started)wakeEl.classList.add('gone');
-  earthBG();
-  // звук: скрежет затухает в шоте 4, вдох и ветер на входе
-  if(actx&&earthG){
-    var sh=0;for(var q=0;q<SHOTS.length;q++){if(t>=SHOTS[q].a&&t<=SHOTS[q].b)sh=q+1;}
-    if(sh<4&&sh>0){earthG.gain.value=0.06;if(Math.random()<dt*2.2)rootSnap();}
-    else if(sh===4){var tl4=t-SHOTS[3].a;earthG.gain.value=Math.max(0,0.06*(1-tl4/1.5));if(!breathPlayed&&tl4>0.2){breathPlayed=true;breath();startWind();}}
-    else earthG.gain.value=0.06;
-  }
-  // рисую активный шот
-  for(var i=0;i<SHOTS.length;i++){var s=SHOTS[i];if(t>=s.a&&t<=s.b){var tl=t-s.a;[drawShot1,drawShot2,drawShot3,drawShot4][i](tl);break;}}
-  // удары темноты
-  var fa=fadeAlpha();
-  if(fa>0){ctx.fillStyle='rgba(0,0,0,'+fa+')';ctx.fillRect(0,0,W,H);}
-  requestAnimationFrame(frame);
+ var dt=Math.min(0.05,(now-last)/1000);last=now;t+=dt;
+ if(t>4&&!started)wakeEl.classList.add('gone');
+ var sh=0;for(var q=0;q<SHOTS.length;q++){if(t>=SHOTS[q].a&&t<=SHOTS[q].b)sh=q+1;}
+ if(actx&&earthG){
+  if(sh>0&&sh<4){earthG.gain.value=0.05;if(sh===1&&windG)windG.gain.value=0;}
+  else if(sh===4){var tl4=t-SHOTS[3].a;earthG.gain.value=Math.max(0,0.05*(1-tl4/1.2));if(!breathPlayed&&tl4>0.2){breathPlayed=true;breath();}if(windG)windG.gain.value=Math.min(0.05,tl4*0.03);}
+  else earthG.gain.value=0.05;
+ }
+ if(sh===1)drawShot1(t-SHOTS[0].a);
+ else if(sh===2)drawShot2(t-SHOTS[1].a);
+ else if(sh===3)drawShot3(t-SHOTS[2].a);
+ else if(sh===4)drawShot4(t-SHOTS[3].a);
+ else earthDark();
+ var fa=fadeAlpha();
+ if(fa>0){ctx.fillStyle='rgba(0,0,0,'+fa+')';ctx.fillRect(0,0,W,H);}
+ if(t>END){ctx.fillStyle='rgba(0,0,0,1)';ctx.fillRect(0,0,W,H);}
+ requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
 </script>
