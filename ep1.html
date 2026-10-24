@@ -55,7 +55,8 @@ function hand(cx,cy,ang,sc,col,pose,mir){
  var f=[],i;
  if(pose==='grab'){
   for(i=0;i<4;i++)f.push([-sc*0.18+i*sc*0.12,sc*0.34,Math.PI/2+(i-1.5)*0.12,sc*0.30,0.9,sc*0.16]);
-  f.push([sc*0.24,sc*0.05,0.2,sc*0.22,0.6,sc*0.12]);
+  // БОЛЬШОЙ: правый край, ВНИЗ (как остальные), кончик подогнут ВЛЕВО к остальным — сомкнутый хват (вид тыла ладони)
+  f.push([sc*0.26,-sc*0.04,Math.PI/2,sc*0.26,0.7,sc*0.13]);
  }else if(pose==='open'){
   for(i=0;i<4;i++)f.push([-sc*0.18+i*sc*0.12,-sc*0.34,-Math.PI/2+(i-1.5)*0.22,sc*0.34,0,0]);
   f.push([-sc*0.26,sc*0.02,Math.PI+0.5,sc*0.24,0,0]);
@@ -89,14 +90,14 @@ function drawShot1(tl){
  var swing=Math.sin(ph*Math.PI),sc=U*0.30,topY=H*0.30,reach=swing*U*0.05;
  if(active===0){
   var lx=W*0.38,ly=topY+reach;
-  // большой палец справа (как красный эталон): рука без зеркала, наклон влево — пальцы сходятся к центру
+  // левая: большой справа (внутрь пары), пальцы к центру
   hand(lx,ly,-(0.12+swing*0.18),sc,WARM,'grab',false);
   moon(lx,ly-sc*0.45,sc*0.07);
   if(ph>0.55&&ph<0.7)crumbSpawn(lx,H*0.80,3);
  }else{
   var rx=W*0.62,ry=topY+reach;
-  // вторая рука тоже без зеркала (палец справа), наклон вправо — пара сходится пальцами к центру
-  hand(rx,ry,+(0.12+swing*0.18),sc,WARM,'grab',false);
+  // правая = зеркало левой: большой слева (внутрь пары), пальцы к центру
+  hand(rx,ry,+(0.12+swing*0.18),sc,WARM,'grab',true);
   moon(rx,ry-sc*0.45,sc*0.07);
   if(ph>0.55&&ph<0.7)crumbSpawn(rx,H*0.80,3);
  }
@@ -129,7 +130,7 @@ function drawShot2(tl){
   ctx.strokeStyle=WARM;ctx.lineWidth=sc*0.24;ctx.lineCap='round';
   ctx.beginPath();ctx.moveTo(wx,wy-sc*0.4);ctx.lineTo(wx+sc*0.12,H*0.05);ctx.stroke();
  }
- // тёплая рука без зеркала -> большой палец на правом крае, вниз, как красный эталон
+ // тёплая накрывает: большой справа, вниз, подогнут к остальным (как красный эталон)
  hand(wx,wy,0.10,sc,WARM,'grab',false);
  moon(wx+sc*0.06,wy-sc*0.5,sc*0.07);
 }
