@@ -118,7 +118,7 @@ function drawShot3(tl){
  topGlow(0.22+tl*0.05);
  var rise=tl*U*0.02,sc=U*0.24;
 
- // тело Персефоны поднимается из земли, без лица и без руки с гранатом
+ // тело Персефоны поднимается из земли
  ctx.save();
  ctx.translate(W*0.48,H*0.78-rise*0.25);
  ctx.rotate(-0.12);
@@ -132,13 +132,30 @@ function drawShot3(tl){
  ctx.fill();
  ctx.restore();
 
- // холодное предплечье и кисть, которую тянут вверх
+ // голова Персефоны: запрокинута, висит, глаза закрыты, грязная бини
+ ctx.strokeStyle='#c9bba0';ctx.lineWidth=U*0.03;ctx.lineCap='round';
+ ctx.beginPath();ctx.moveTo(W*0.46,H*0.62-rise*0.25);ctx.lineTo(W*0.45,H*0.585-rise*0.3);ctx.stroke();
+ ctx.save();
+ ctx.translate(W*0.45,H*0.56-rise*0.3);
+ ctx.rotate(0.32);
+ ctx.fillStyle='#c9bba0';
+ ctx.beginPath();ctx.ellipse(0,0,U*0.045,U*0.055,0,0,PI2);ctx.fill();
+ ctx.fillStyle='#241d1a';
+ ctx.beginPath();ctx.arc(0,-U*0.01,U*0.05,Math.PI*1.05,Math.PI*1.95);ctx.fill();
+ ctx.fillStyle='#2c2c31';
+ ctx.fillRect(-U*0.05,-U*0.02,U*0.10,U*0.018);
+ ctx.strokeStyle='#241d1a';ctx.lineWidth=1.4*DPR;
+ ctx.beginPath();ctx.moveTo(-U*0.022,U*0.008);ctx.lineTo(-U*0.008,U*0.010);ctx.stroke();
+ ctx.beginPath();ctx.moveTo(U*0.008,U*0.010);ctx.lineTo(U*0.022,U*0.008);ctx.stroke();
+ ctx.restore();
+
+ // холодное предплечье и кисть Персефоны
  var hx=W*0.55,hy=H*0.50-rise;
  ctx.strokeStyle=COLD;ctx.lineWidth=U*0.035;ctx.lineCap='round';
  ctx.beginPath();ctx.moveTo(W*0.50,H*0.66-rise*0.35);ctx.lineTo(hx,hy+sc*0.25);ctx.stroke();
  hand(hx,hy,-0.10,sc,COLD,'open',false);
 
- // плечо Артемиды сверху
+ // плечо Артемиды
  ctx.fillStyle='#6f6a4f';
  ctx.beginPath();
  ctx.moveTo(W*0.66,H*0.08);
@@ -148,7 +165,22 @@ function drawShot3(tl){
  ctx.closePath();
  ctx.fill();
 
- // тёплая рука Артемиды тянет холодное запястье
+ // голова Артемиды: наклонена к Персефоне, глаз открыт, смотрит вниз-влево
+ ctx.strokeStyle='#d8b89a';ctx.lineWidth=U*0.035;ctx.lineCap='round';
+ ctx.beginPath();ctx.moveTo(W*0.72,H*0.16);ctx.lineTo(W*0.70,H*0.12);ctx.stroke();
+ ctx.save();
+ ctx.translate(W*0.70,H*0.10);
+ ctx.rotate(-0.45);
+ ctx.fillStyle='#d8b89a';
+ ctx.beginPath();ctx.ellipse(0,0,U*0.05,U*0.058,0,0,PI2);ctx.fill();
+ ctx.fillStyle='#d9c98f';
+ ctx.beginPath();ctx.arc(0,-U*0.005,U*0.055,Math.PI*0.95,Math.PI*2.05);ctx.fill();
+ ctx.beginPath();ctx.arc(U*0.045,U*0.01,U*0.022,0,PI2);ctx.fill();
+ ctx.fillStyle='#241d1a';
+ ci(-U*0.022,U*0.012,U*0.006,'#241d1a');
+ ctx.restore();
+
+ // тёплая рука Артемиды тянет холодное запястье (поверх)
  ctx.strokeStyle=WARM;ctx.lineWidth=U*0.04;ctx.lineCap='round';
  ctx.beginPath();ctx.moveTo(W*0.70,H*0.22);ctx.lineTo(hx+sc*0.05,hy-sc*0.20);ctx.stroke();
  hand(hx+sc*0.02,hy-sc*0.18,0.20,sc*0.85,WARM,'cover',false);
