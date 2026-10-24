@@ -13,7 +13,7 @@ canvas{display:block;width:100vw;height:100vh}
 </style>
 </head>
 <body>
-<div id="ok">Если видишь эту надпись — код не запустился. Пересохни файл целиком.</div>
+<div id="ok">Если видишь эту надпись — код не запустился. Пересохрани файл целиком.</div>
 <div id="wake">коснись, чтобы услышать сон</div>
 <canvas id="c"></canvas>
 <script>
@@ -73,12 +73,13 @@ function hand(cx,cy,ang,sc,col,pose,mir){
 function moon(x,y,r){ctx.strokeStyle='#cfd6da';ctx.lineWidth=1.6*DPR;ctx.beginPath();ctx.arc(x,y,r,0.5,5.8);ctx.stroke();}
 
 function earthDark(){var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#120c07');g.addColorStop(0.6,'#1c130b');g.addColorStop(1,'#0a0603');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+function resetClods(){for(var i=0;i<clods.length;i++)clods[i].a=1;}
 function soilBand(){ctx.fillStyle='#241812';ctx.fillRect(0,H*0.78,W,H*0.22);for(var i=0;i<clods.length;i++){var o=clods[i];if(o.a<=0)continue;ci(o.nx*W,o.ny*H,o.rn*U*o.a,'#3a281a');}}
 function crumbSpawn(x,y,n){for(var i=0;i<n;i++){var p=crumbs[Math.floor(Math.random()*crumbs.length)];p.nx=x/W+(Math.random()-0.5)*0.04;p.ny=y/H;p.vx=(Math.random()-0.5)*0.002;p.vy=0.002+Math.random()*0.003;p.live=1;}}
 function crumbDraw(){for(var i=0;i<crumbs.length;i++){var p=crumbs[i];if(p.live<=0)continue;p.nx+=p.vx;p.ny+=p.vy;p.live-=0.02;if(p.ny>1.05)p.live=0;ci(p.nx*W,p.ny*H,p.rn*U*0.5,'rgba(50,35,22,'+(p.live*0.8)+')');}}
 
 function morningSky(){var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#9fb0bc');g.addColorStop(0.5,'#c4c8c2');g.addColorStop(1,'#dcd6c8');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
-function tree(x,sc,sd){var y=H*0.74,tr=U*0.15*sc;ctx.strokeStyle='#5b4a39';ctx.lineWidth=3*sc*DPR;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y-tr);ctx.stroke();for(var i=0;i<7;i++){var a=sd+i,rr=tr*(0.5+0.3*Math.sin(a*3));ci(x+Math.cos(a)*rr*0.9,y-tr+Math.sin(a*1.3)*rr*0.5,tr*0.42,'rgba(245,238,228,0.95)');}for(var j=0;j<9;j++){var b=sd*2+j;ci(x+Math.cos(b)*tr*0.7,y-tr+Math.sin(b)*tr*0.4,tr*0.12,'rgba(240,208,214,0.6)');}}
+function tree(x,sc,sd,by){var y=by||H*0.74,tr=U*0.15*sc;ctx.strokeStyle='#5b4a39';ctx.lineWidth=3*sc*DPR;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y-tr);ctx.stroke();for(var i=0;i<7;i++){var a=sd+i,rr=tr*(0.5+0.3*Math.sin(a*3));ci(x+Math.cos(a)*rr*0.9,y-tr+Math.sin(a*1.3)*rr*0.5,tr*0.42,'rgba(245,238,228,0.95)');}for(var j=0;j<9;j++){var b=sd*2+j;ci(x+Math.cos(b)*tr*0.7,y-tr+Math.sin(b)*tr*0.4,tr*0.12,'rgba(240,208,214,0.6)');}}
 function petalDraw(){for(var k=0;k<petals.length;k++){var p=petals[k];p.nx+=p.vx;p.ny+=p.vy;p.a+=p.va;if(p.ny>1.05){petals[k]=newPetal(false);continue;}ctx.save();ctx.translate(p.nx*W,p.ny*H);ctx.rotate(p.a);ctx.fillStyle='rgba(247,240,232,0.9)';ctx.beginPath();ctx.ellipse(0,0,p.rn*H*1.6,p.rn*H,0,0,PI2);ctx.fill();ctx.restore();}}
 function topGlow(k){if(k<=0)return;var g=ctx.createLinearGradient(0,0,0,H*0.5);g.addColorStop(0,'rgba(180,190,200,'+(0.4*k)+')');g.addColorStop(1,'rgba(180,190,200,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H*0.5);}
 
@@ -89,55 +90,123 @@ function drawShot1(tl){
  if(active===0){
   var lx=W*0.38,ly=topY+reach;
   hand(lx,ly,0.12+swing*0.18,sc,WARM,'grab',false);
-  moon(lx,ly+sc*0.55,sc*0.07);
+  moon(lx,ly-sc*0.45,sc*0.07);
   if(ph>0.55&&ph<0.7)crumbSpawn(lx,H*0.80,3);
  }else{
   var rx=W*0.62,ry=topY+reach;
   hand(rx,ry,0.12+swing*0.18,sc,WARM,'grab',true);
+  moon(rx,ry-sc*0.45,sc*0.07);
   if(ph>0.55&&ph<0.7)crumbSpawn(rx,H*0.80,3);
  }
  if(ph>0.55&&scrapedIdx!==idx){scrape();scrapedIdx=idx;for(var i=0;i<clods.length;i++){var o=clods[i];if(o.ny>0.84)o.a=Math.max(0,o.a-0.18);}}
  crumbDraw();
 }
+
 function drawShot2(tl){
- earthDark();
+ earthDark();resetClods();soilBand();
  var drift=Math.sin(tl*1.2)*U*0.008,sc=U*0.30;
- hand(W*0.40,H*0.70+drift,0.05,sc,COLD,'fist',false);
- ci(W*0.40+sc*0.20,H*0.70+drift+sc*0.07,sc*0.17,POME);
- hand(W*0.52,H*0.62-drift,-0.12,sc,COLD,'open',false);
- var low=Math.min(1,tl/1.6),wy=H*0.30+low*U*0.18;
+ hand(W*0.40,H*0.66+drift,0.05,sc,COLD,'fist',false);
+ ci(W*0.40+sc*0.20,H*0.66+drift+sc*0.07,sc*0.17,POME);
+ hand(W*0.52,H*0.58-drift,-0.12,sc,COLD,'open',false);
+ var low=Math.min(1,tl/1.6),wy=H*0.30+low*U*0.22;
  hand(W*0.52,wy,0.12,sc,WARM,'grab',true);
- moon(W*0.52+sc*0.10,wy+sc*0.55,sc*0.07);
+ moon(W*0.52,wy-sc*0.45,sc*0.07);
 }
+
 function drawShot3(tl){
- earthDark();
- var rise=tl*U*0.03,sc=U*0.28;
- hand(W*0.42,H*0.80,0.05,sc,COLD,'fist',false);
- ci(W*0.42+sc*0.20,H*0.80+sc*0.07,sc*0.16,POME);
- hand(W*0.55,H*0.52-rise,-0.10,sc,COLD,'open',false);
- hand(W*0.55,H*0.30-rise,0.12,sc,WARM,'grab',true);
- moon(W*0.55+sc*0.10,H*0.30-rise+sc*0.55,sc*0.07);
- topGlow(0.2+tl*0.05);
+ earthDark();resetClods();soilBand();
+ topGlow(0.22+tl*0.05);
+ var rise=tl*U*0.02,sc=U*0.24;
+
+ // тело Персефоны поднимается из земли, без лица и без руки с гранатом
+ ctx.save();
+ ctx.translate(W*0.48,H*0.78-rise*0.25);
+ ctx.rotate(-0.12);
+ ctx.fillStyle='#3a3a40';
+ ctx.beginPath();
+ ctx.moveTo(-U*0.08,U*0.04);
+ ctx.lineTo(U*0.08,U*0.04);
+ ctx.lineTo(U*0.055,-U*0.16);
+ ctx.lineTo(-U*0.055,-U*0.16);
+ ctx.closePath();
+ ctx.fill();
+ ctx.restore();
+
+ // холодное предплечье и кисть, которую тянут вверх
+ var hx=W*0.55,hy=H*0.50-rise;
+ ctx.strokeStyle=COLD;ctx.lineWidth=U*0.035;ctx.lineCap='round';
+ ctx.beginPath();ctx.moveTo(W*0.50,H*0.66-rise*0.35);ctx.lineTo(hx,hy+sc*0.25);ctx.stroke();
+ hand(hx,hy,-0.10,sc,COLD,'open',false);
+
+ // плечо Артемиды сверху
+ ctx.fillStyle='#6f6a4f';
+ ctx.beginPath();
+ ctx.moveTo(W*0.66,H*0.08);
+ ctx.lineTo(W*0.86,H*0.16);
+ ctx.lineTo(W*0.78,H*0.34);
+ ctx.lineTo(W*0.60,H*0.24);
+ ctx.closePath();
+ ctx.fill();
+
+ // тёплая рука Артемиды тянет холодное запястье
+ ctx.strokeStyle=WARM;ctx.lineWidth=U*0.04;ctx.lineCap='round';
+ ctx.beginPath();ctx.moveTo(W*0.70,H*0.22);ctx.lineTo(hx+sc*0.05,hy-sc*0.20);ctx.stroke();
+ hand(hx+sc*0.02,hy-sc*0.18,0.20,sc*0.85,WARM,'cover',false);
+ moon(W*0.70,H*0.25,U*0.02);
+
+ if(Math.random()<0.05)crumbSpawn(W*0.50+(Math.random()-0.5)*W*0.12,H*0.78,1);
+ crumbDraw();
 }
+
 function drawShot4(tl){
  morningSky();
- tree(W*0.12,1.0,1.2);tree(W*0.30,1.05,2.9);tree(W*0.70,0.95,4.4);tree(W*0.92,1.1,3.7);
  ctx.fillStyle='#3a2c20';ctx.fillRect(0,H*0.80,W,H*0.20);
- petalDraw();
+ tree(W*0.12,1.0,1.2,H*0.80);
+ tree(W*0.30,1.05,2.9,H*0.80);
+ tree(W*0.70,0.95,4.4,H*0.80);
+ tree(W*0.92,1.1,3.7,H*0.80);
+
  var s=U*0.0026,fy=H*0.80,ax=W*0.47,px=W*0.53,tilt=-0.16;
- ctx.save();ctx.translate(px,fy);ctx.rotate(tilt);
- ctx.fillStyle='#3a3a40';ctx.beginPath();ctx.moveTo(-25*s,-148*s+10*s);ctx.lineTo(25*s,-148*s+10*s);ctx.lineTo(19*s,0);ctx.lineTo(-19*s,0);ctx.closePath();ctx.fill();
- ctx.fillStyle='#241d1a';ctx.beginPath();ctx.arc(0,-166*s,17*s,0,PI2);ctx.fill();
+
+ // Персефона: прислонилась, гранат всё ещё сжат
+ ctx.save();
+ ctx.translate(px,fy);
+ ctx.rotate(tilt);
+ ctx.fillStyle='#3a3a40';
+ ctx.beginPath();
+ ctx.moveTo(-25*s,-148*s+10*s);
+ ctx.lineTo(25*s,-148*s+10*s);
+ ctx.lineTo(19*s,0);
+ ctx.lineTo(-19*s,0);
+ ctx.closePath();
+ ctx.fill();
+ ctx.fillStyle='#241d1a';
+ ctx.beginPath();ctx.arc(0,-166*s,17*s,0,PI2);ctx.fill();
  ci(0,-166*s,14*s,'#d8c3a8');
- ctx.fillStyle='#2c2c31';ctx.beginPath();ctx.arc(0,-172*s,16*s,Math.PI,0);ctx.fill();ctx.fillRect(-16*s,-174*s,32*s,6*s);
+ ctx.fillStyle='#2c2c31';
+ ctx.beginPath();ctx.arc(0,-172*s,16*s,Math.PI,0);ctx.fill();
+ ctx.fillRect(-16*s,-174*s,32*s,6*s);
  ctx.fillStyle='#9aa07a';ctx.fillRect(4*s,-172*s,7*s,7*s);
  hand(14*s,-96*s,0.3,16*s,COLD,'fist',false);
  ci(20*s,-92*s,7*s,POME);
  ctx.restore();
- ctx.fillStyle='#6f6a4f';ctx.beginPath();ctx.moveTo(ax-26*s,fy-150*s+10*s);ctx.lineTo(ax+26*s,fy-150*s+10*s);ctx.lineTo(ax+20*s,fy);ctx.lineTo(ax-20*s,fy);ctx.closePath();ctx.fill();
- ci(ax,fy-168*s,16*s,'#d8b89a');ctx.fillStyle='#d9c98f';ctx.beginPath();ctx.arc(ax,fy-172*s,17*s,Math.PI,0);ctx.fill();
+
+ // Артемида рядом, придерживает за плечо
+ ctx.fillStyle='#6f6a4f';
+ ctx.beginPath();
+ ctx.moveTo(ax-26*s,fy-150*s+10*s);
+ ctx.lineTo(ax+26*s,fy-150*s+10*s);
+ ctx.lineTo(ax+20*s,fy);
+ ctx.lineTo(ax-20*s,fy);
+ ctx.closePath();
+ ctx.fill();
+ ci(ax,fy-168*s,16*s,'#d8b89a');
+ ctx.fillStyle='#d9c98f';
+ ctx.beginPath();ctx.arc(ax,fy-172*s,17*s,Math.PI,0);ctx.fill();
  moon(ax,fy-132*s,5*s);
  hand(ax+18*s,fy-126*s,-0.35,15*s,WARM,'cover',false);
+
+ petalDraw();
 }
 
 function fadeAlpha(){for(var i=0;i<SHOTS.length;i++){var s=SHOTS[i];if(t>=s.a&&t<=s.b){var tin=Math.min(1,(t-s.a)/FADE),tout=Math.min(1,(s.b-t)/FADE);return 1-Math.min(tin,tout);}}return 1;}
