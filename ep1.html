@@ -48,36 +48,26 @@ window.addEventListener('touchstart',function(){wake();},{passive:true});
 function ln(x1,y1,x2,y2,w,col){ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
 function ci(x,y,r,col){ctx.fillStyle=col;ctx.beginPath();ctx.arc(x,y,r,0,PI2);ctx.fill();}
 
-// КИСТЬ: ладонь-овал; 4 пальца веером с НИЖНЕГО края; большой палец с ПРАВОГО края, ПРИЖАТ, ВНИЗ (клешня хвата), кончик чуть внутрь.
-// mir=true даёт вторую руку зеркалом. pose: open|grab|cover|fist.
 function hand(cx,cy,ang,sc,col,pose,mir){
  ctx.save();ctx.translate(cx,cy);ctx.rotate(ang);if(mir)ctx.scale(-1,1);
  ctx.fillStyle=col;ctx.strokeStyle=col;ctx.lineCap='round';ctx.lineJoin='round';
  ctx.beginPath();ctx.ellipse(0,0,sc*0.26,sc*0.40,0,0,PI2);ctx.fill();
- var i,fb=sc*0.32;
- for(i=0;i<4;i++){
-  var fx=-sc*0.16+i*sc*0.107;
-  var fa=Math.PI/2+(i-1.5)*0.10;
-  var fl=sc*0.30;
-  var x1=fx+Math.cos(fa)*fl, y1=fb+Math.sin(fa)*fl;
-  ctx.lineWidth=sc*0.095;
-  ctx.beginPath();ctx.moveTo(fx,fb);ctx.lineTo(x1,y1);
-  if(pose==='grab'||pose==='fist'){
-   var ca=fa+((i<2)?0.7:-0.7);
-   var cl=(pose==='fist')?sc*0.10:sc*0.16;
-   ctx.lineTo(x1+Math.cos(ca)*cl,y1+Math.sin(ca)*cl);
-  }
-  ctx.stroke();
+ var f=[],i;
+ if(pose==='grab'){
+  for(i=0;i<4;i++)f.push([-sc*0.18+i*sc*0.12,sc*0.34,Math.PI/2+(i-1.5)*0.12,sc*0.30,0.9,sc*0.16]);
+  f.push([sc*0.24,sc*0.05,0.2,sc*0.22,0.6,sc*0.12]);
+ }else if(pose==='open'){
+  for(i=0;i<4;i++)f.push([-sc*0.18+i*sc*0.12,-sc*0.34,-Math.PI/2+(i-1.5)*0.22,sc*0.34,0,0]);
+  f.push([-sc*0.26,sc*0.02,Math.PI+0.5,sc*0.24,0,0]);
+ }else if(pose==='cover'){
+  for(i=0;i<4;i++)f.push([sc*0.22,-sc*0.12+i*sc*0.09,0,sc*0.34,0,0]);
+  f.push([sc*0.10,sc*0.20,0.5,sc*0.20,0,0]);
+ }else if(pose==='fist'){
+  for(i=0;i<4;i++){ctx.beginPath();ctx.arc(-sc*0.16+i*sc*0.11,sc*0.10,sc*0.10,Math.PI,0);ctx.fill();}
+  ctx.beginPath();ctx.arc(sc*0.20,0,sc*0.09,Math.PI*1.2,Math.PI*2.2);ctx.fill();
  }
- // БОЛЬШОЙ ПАЛЕЦ — правый край ладони, прижат, ВНИЗ, как красный эталон (клешня), кончик внутрь.
- ctx.lineWidth=sc*0.13;
- var tx=sc*0.24, ty=-sc*0.02;
- ctx.beginPath();ctx.moveTo(tx,ty);
- if(pose==='open'){ctx.lineTo(sc*0.34,sc*0.06);}
- else if(pose==='grab'){ctx.lineTo(sc*0.28,sc*0.14);ctx.lineTo(sc*0.19,sc*0.23);}
- else if(pose==='cover'){ctx.lineTo(sc*0.27,sc*0.12);}
- else if(pose==='fist'){ctx.lineTo(sc*0.22,sc*0.14);}
- ctx.stroke();
+ ctx.lineWidth=sc*0.10;
+ for(var k=0;k<f.length;k++){var p=f[k];var x0=p[0],y0=p[1];var x1=x0+Math.cos(p[2])*p[3];var y1=y0+Math.sin(p[2])*p[3];ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);if(p[5]>0){var x2=x1+Math.cos(p[2]+p[4])*p[5];var y2=y1+Math.sin(p[2]+p[4])*p[5];ctx.lineTo(x2,y2);}ctx.stroke();}
  ctx.restore();
 }
 function moon(x,y,r){ctx.strokeStyle='#cfd6da';ctx.lineWidth=1.6*DPR;ctx.beginPath();ctx.arc(x,y,r,0.5,5.8);ctx.stroke();}
@@ -97,15 +87,16 @@ function drawShot1(tl){
  earthDark();soilBand();
  var cyc=1.25,idx=Math.floor(tl/cyc),ph=(tl%cyc)/cyc,active=idx%2;
  var swing=Math.sin(ph*Math.PI),sc=U*0.30,topY=H*0.30,reach=swing*U*0.05;
- // КНОПКА РАЗВОРОТА ПАРЫ: левая -(..), правая +(..) + mir. Поменяй оба знака -> пара развернётся.
  if(active===0){
   var lx=W*0.38,ly=topY+reach;
+  // большой палец справа (как красный эталон): рука без зеркала, наклон влево — пальцы сходятся к центру
   hand(lx,ly,-(0.12+swing*0.18),sc,WARM,'grab',false);
   moon(lx,ly-sc*0.45,sc*0.07);
   if(ph>0.55&&ph<0.7)crumbSpawn(lx,H*0.80,3);
  }else{
   var rx=W*0.62,ry=topY+reach;
-  hand(rx,ry,+(0.12+swing*0.18),sc,WARM,'grab',true);
+  // вторая рука тоже без зеркала (палец справа), наклон вправо — пара сходится пальцами к центру
+  hand(rx,ry,+(0.12+swing*0.18),sc,WARM,'grab',false);
   moon(rx,ry-sc*0.45,sc*0.07);
   if(ph>0.55&&ph<0.7)crumbSpawn(rx,H*0.80,3);
  }
@@ -119,17 +110,27 @@ function drawShot2(tl){
  var drift=Math.sin(tl*1.2)*(PORT?W*0.006:U*0.008);
  var sc=U*0.30;
  var fx=PORT?W*0.26:W*0.40, fy=PORT?H*0.62:H*0.66;
- if(!PORT){ctx.strokeStyle=COLD;ctx.lineWidth=sc*0.22;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(fx,fy+sc*0.3);ctx.lineTo(fx-sc*0.1,H*0.80);ctx.stroke();}
+ if(!PORT){
+  ctx.strokeStyle=COLD;ctx.lineWidth=sc*0.22;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(fx,fy+sc*0.3);ctx.lineTo(fx-sc*0.1,H*0.80);ctx.stroke();
+ }
  hand(fx,fy,0.05,sc,COLD,'fist',false);
  ci(fx+sc*0.20,fy+sc*0.07,sc*0.17,POME);
  var ox=PORT?W*0.60:W*0.52, oy=PORT?H*0.56:H*0.58;
- if(!PORT){ctx.strokeStyle=COLD;ctx.lineWidth=sc*0.22;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(ox,oy+sc*0.3);ctx.lineTo(ox+sc*0.1,H*0.80);ctx.stroke();}
+ if(!PORT){
+  ctx.strokeStyle=COLD;ctx.lineWidth=sc*0.22;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(ox,oy+sc*0.3);ctx.lineTo(ox+sc*0.1,H*0.80);ctx.stroke();
+ }
  hand(ox,oy,-0.12,sc,COLD,'open',false);
  var low=Math.min(1,tl/1.6);
  var wx=ox, wyS=PORT?H*0.18:H*0.20, wyE=oy-sc*0.5;
  var wy=wyS+low*(wyE-wyS);
- if(!PORT){ctx.strokeStyle=WARM;ctx.lineWidth=sc*0.24;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(wx,wy-sc*0.4);ctx.lineTo(wx+sc*0.12,H*0.05);ctx.stroke();}
- hand(wx,wy,0.10,sc,WARM,'grab',true);
+ if(!PORT){
+  ctx.strokeStyle=WARM;ctx.lineWidth=sc*0.24;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(wx,wy-sc*0.4);ctx.lineTo(wx+sc*0.12,H*0.05);ctx.stroke();
+ }
+ // тёплая рука без зеркала -> большой палец на правом крае, вниз, как красный эталон
+ hand(wx,wy,0.10,sc,WARM,'grab',false);
  moon(wx+sc*0.06,wy-sc*0.5,sc*0.07);
 }
 
@@ -140,43 +141,66 @@ function drawShot3(tl){
  var rise=tl*(PORT?W*0.012:U*0.02);
  var sc=PORT?U*0.30:U*0.24;
  var gh=U*0.05;
+
  ctx.save();
  ctx.translate(PORT?W*0.42:W*0.48,H*0.78-rise*0.25);
  ctx.rotate(-0.12);
  ctx.fillStyle='#3a3a40';
  ctx.beginPath();
- ctx.moveTo(-sc*0.33,sc*0.16);ctx.lineTo(sc*0.33,sc*0.16);ctx.lineTo(sc*0.23,-sc*0.66);ctx.lineTo(-sc*0.23,-sc*0.66);ctx.closePath();ctx.fill();
+ ctx.moveTo(-sc*0.33,sc*0.16);
+ ctx.lineTo(sc*0.33,sc*0.16);
+ ctx.lineTo(sc*0.23,-sc*0.66);
+ ctx.lineTo(-sc*0.23,-sc*0.66);
+ ctx.closePath();
+ ctx.fill();
  ctx.restore();
+
  ctx.save();
  ctx.translate(PORT?W*0.40:W*0.45,H*0.585-rise*0.3);
  ctx.rotate(0.32);
- ctx.fillStyle='#c9bba0';ctx.beginPath();ctx.ellipse(0,0,gh,gh*1.2,0,0,PI2);ctx.fill();
- ctx.fillStyle='#241d1a';ctx.beginPath();ctx.arc(0,-gh*0.2,gh*1.1,Math.PI*1.05,Math.PI*1.95);ctx.fill();
- ctx.fillStyle='#2c2c31';ctx.fillRect(-gh,-gh*0.4,gh*2,gh*0.35);
+ ctx.fillStyle='#c9bba0';
+ ctx.beginPath();ctx.ellipse(0,0,gh,gh*1.2,0,0,PI2);ctx.fill();
+ ctx.fillStyle='#241d1a';
+ ctx.beginPath();ctx.arc(0,-gh*0.2,gh*1.1,Math.PI*1.05,Math.PI*1.95);ctx.fill();
+ ctx.fillStyle='#2c2c31';
+ ctx.fillRect(-gh,-gh*0.4,gh*2,gh*0.35);
  ctx.strokeStyle='#241d1a';ctx.lineWidth=1.4*DPR;
  ctx.beginPath();ctx.moveTo(-gh*0.5,gh*0.15);ctx.lineTo(-gh*0.18,gh*0.18);ctx.stroke();
  ctx.beginPath();ctx.moveTo(gh*0.18,gh*0.18);ctx.lineTo(gh*0.5,gh*0.15);ctx.stroke();
  ctx.restore();
+
  var hx=PORT?W*0.52:W*0.55, hy=H*0.50-rise;
  ctx.strokeStyle=COLD;ctx.lineWidth=sc*0.26;ctx.lineCap='round';
  ctx.beginPath();ctx.moveTo(PORT?W*0.46:W*0.50,PORT?H*0.62:H*0.66-rise*0.35);ctx.lineTo(hx,hy+sc*0.25);ctx.stroke();
  hand(hx,hy,-0.10,sc,COLD,'open',false);
+
  ctx.fillStyle='#6f6a4f';
  ctx.beginPath();
- ctx.moveTo(PORT?W*0.62:W*0.66,H*0.10);ctx.lineTo(PORT?W*0.80:W*0.86,H*0.17);ctx.lineTo(PORT?W*0.72:W*0.78,H*0.32);ctx.lineTo(PORT?W*0.58:W*0.60,H*0.25);ctx.closePath();ctx.fill();
+ ctx.moveTo(PORT?W*0.62:W*0.66,H*0.10);
+ ctx.lineTo(PORT?W*0.80:W*0.86,H*0.17);
+ ctx.lineTo(PORT?W*0.72:W*0.78,H*0.32);
+ ctx.lineTo(PORT?W*0.58:W*0.60,H*0.25);
+ ctx.closePath();
+ ctx.fill();
+
  ctx.save();
  ctx.translate(PORT?W*0.66:W*0.70,H*0.12);
  ctx.rotate(-0.45);
- ctx.fillStyle='#d8b89a';ctx.beginPath();ctx.ellipse(0,0,gh,gh*1.16,0,0,PI2);ctx.fill();
- ctx.fillStyle='#d9c98f';ctx.beginPath();ctx.arc(0,-gh*0.1,gh*1.1,Math.PI*0.95,Math.PI*2.05);ctx.fill();
+ ctx.fillStyle='#d8b89a';
+ ctx.beginPath();ctx.ellipse(0,0,gh,gh*1.16,0,0,PI2);ctx.fill();
+ ctx.fillStyle='#d9c98f';
+ ctx.beginPath();ctx.arc(0,-gh*0.1,gh*1.1,Math.PI*0.95,Math.PI*2.05);ctx.fill();
  ctx.beginPath();ctx.arc(gh*0.9,gh*0.2,gh*0.44,0,PI2);ctx.fill();
- ctx.fillStyle='#241d1a';ci(-gh*0.44,gh*0.24,gh*0.12,'#241d1a');
+ ctx.fillStyle='#241d1a';
+ ci(-gh*0.44,gh*0.24,gh*0.12,'#241d1a');
  ctx.restore();
+
  var ex=hx, ey=hy-sc*0.45;
  ctx.strokeStyle=WARM;ctx.lineWidth=sc*0.28;ctx.lineCap='round';
  ctx.beginPath();ctx.moveTo(PORT?W*0.68:W*0.70,PORT?H*0.26:H*0.22);ctx.lineTo(ex,ey);ctx.stroke();
  hand(ex,ey,0.12,sc,WARM,'grab',true);
  moon(PORT?W*0.66:W*0.68,PORT?H*0.24:H*0.20,gh*0.4);
+
  if(Math.random()<0.05)crumbSpawn(PORT?W*0.46:W*0.50,H*0.78,1);
  crumbDraw();
 }
@@ -184,24 +208,50 @@ function drawShot3(tl){
 function drawShot4(tl){
  morningSky();
  ctx.fillStyle='#3a2c20';ctx.fillRect(0,H*0.80,W,H*0.20);
- tree(W*0.12,1.0,1.2,H*0.80);tree(W*0.30,1.05,2.9,H*0.80);tree(W*0.70,0.95,4.4,H*0.80);tree(W*0.92,1.1,3.7,H*0.80);
+ tree(W*0.12,1.0,1.2,H*0.80);
+ tree(W*0.30,1.05,2.9,H*0.80);
+ tree(W*0.70,0.95,4.4,H*0.80);
+ tree(W*0.92,1.1,3.7,H*0.80);
+
  var PORT=H>W;
  var s=PORT?W*0.0032:U*0.0026;
  var fy=H*0.80, ax=PORT?W*0.42:W*0.47, px=PORT?W*0.58:W*0.53, tilt=PORT?-0.09:-0.16;
+
  ctx.save();
- ctx.translate(px,fy);ctx.rotate(tilt);
- ctx.fillStyle='#3a3a40';ctx.beginPath();ctx.moveTo(-25*s,-148*s+10*s);ctx.lineTo(25*s,-148*s+10*s);ctx.lineTo(19*s,0);ctx.lineTo(-19*s,0);ctx.closePath();ctx.fill();
- ctx.fillStyle='#241d1a';ctx.beginPath();ctx.arc(0,-166*s,17*s,0,PI2);ctx.fill();
+ ctx.translate(px,fy);
+ ctx.rotate(tilt);
+ ctx.fillStyle='#3a3a40';
+ ctx.beginPath();
+ ctx.moveTo(-25*s,-148*s+10*s);
+ ctx.lineTo(25*s,-148*s+10*s);
+ ctx.lineTo(19*s,0);
+ ctx.lineTo(-19*s,0);
+ ctx.closePath();
+ ctx.fill();
+ ctx.fillStyle='#241d1a';
+ ctx.beginPath();ctx.arc(0,-166*s,17*s,0,PI2);ctx.fill();
  ci(0,-166*s,14*s,'#d8c3a8');
- ctx.fillStyle='#2c2c31';ctx.beginPath();ctx.arc(0,-172*s,16*s,Math.PI,0);ctx.fill();ctx.fillRect(-16*s,-174*s,32*s,6*s);
+ ctx.fillStyle='#2c2c31';
+ ctx.beginPath();ctx.arc(0,-172*s,16*s,Math.PI,0);ctx.fill();
+ ctx.fillRect(-16*s,-174*s,32*s,6*s);
  ctx.fillStyle='#9aa07a';ctx.fillRect(4*s,-172*s,7*s,7*s);
  hand(14*s,-96*s,0.3,16*s,COLD,'fist',false);
  ci(20*s,-92*s,7*s,POME);
  ctx.restore();
- ctx.fillStyle='#6f6a4f';ctx.beginPath();ctx.moveTo(ax-26*s,fy-150*s+10*s);ctx.lineTo(ax+26*s,fy-150*s+10*s);ctx.lineTo(ax+20*s,fy);ctx.lineTo(ax-20*s,fy);ctx.closePath();ctx.fill();
+
+ ctx.fillStyle='#6f6a4f';
+ ctx.beginPath();
+ ctx.moveTo(ax-26*s,fy-150*s+10*s);
+ ctx.lineTo(ax+26*s,fy-150*s+10*s);
+ ctx.lineTo(ax+20*s,fy);
+ ctx.lineTo(ax-20*s,fy);
+ ctx.closePath();
+ ctx.fill();
  ci(ax,fy-168*s,16*s,'#d8b89a');
- ctx.fillStyle='#d9c98f';ctx.beginPath();ctx.arc(ax,fy-172*s,17*s,Math.PI,0);ctx.fill();
+ ctx.fillStyle='#d9c98f';
+ ctx.beginPath();ctx.arc(ax,fy-172*s,17*s,Math.PI,0);ctx.fill();
  moon(ax,fy-132*s,5*s);
+
  if(PORT){
   var tx=px-22*s, ty=fy-138*s;
   ctx.strokeStyle=WARM;ctx.lineWidth=15*s*0.9;ctx.lineCap='round';
@@ -210,6 +260,7 @@ function drawShot4(tl){
  }else{
   hand(ax+18*s,fy-126*s,-0.35,15*s,WARM,'cover',false);
  }
+
  petalDraw();
 }
 
