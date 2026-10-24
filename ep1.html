@@ -59,7 +59,7 @@ function hand(cx,cy,ang,sc,col,pose,mir){
  var f=[],i;
  if(pose==='grab'){
   for(i=0;i<4;i++)f.push([-sc*0.18+i*sc*0.12,sc*0.34,Math.PI/2+(i-1.5)*FAN,sc*0.30,0.9,sc*0.16]);
-  f.push([-sc*0.26,-sc*0.04,Math.PI/2,sc*0.26,-TBEND,sc*0.13]);
+  f.push([-sc*0.26,-sc*0.04,Math.PI/2,sc*0.26,TBEND,sc*0.13]);
  }else if(pose==='open'){
   for(i=0;i<4;i++)f.push([-sc*0.18+i*sc*0.12,-sc*0.34,-Math.PI/2+(i-1.5)*0.22,sc*0.34,0,0]);
   f.push([-sc*0.26,sc*0.02,Math.PI+0.5,sc*0.24,0,0]);
@@ -92,13 +92,13 @@ function drawShot1(tl){
  var cyc=1.25,idx=Math.floor(tl/cyc),ph=(tl%cyc)/cyc,active=idx%2;
  var swing=Math.sin(ph*Math.PI),sc=U*0.30,topY=H*0.30,reach=swing*U*0.05;
  if(active===0){
-  var lx=W*0.38,ly=topY+reach;
-  hand(lx,ly,-(0.12+swing*0.18),sc,WARM,'grab',!R2MIR);
+  var lx=W*0.62,ly=topY+reach;
+  hand(lx,ly,+(0.12+swing*0.18),sc,WARM,'grab',!R2MIR);
   moon(lx,ly-sc*0.45,sc*0.07);
   if(ph>0.55&&ph<0.7)crumbSpawn(lx,H*0.80,3);
  }else{
-  var rx=W*0.62,ry=topY+reach;
-  hand(rx,ry,+(0.12+swing*0.18),sc,WARM,'grab',R2MIR);
+  var rx=W*0.38,ry=topY+reach;
+  hand(rx,ry,-(0.12+swing*0.18),sc,WARM,'grab',R2MIR);
   moon(rx,ry-sc*0.45,sc*0.07);
   if(ph>0.55&&ph<0.7)crumbSpawn(rx,H*0.80,3);
  }
