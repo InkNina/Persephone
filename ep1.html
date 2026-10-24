@@ -107,7 +107,6 @@ function drawShot2(tl){
  var PORT=H>W;
  var drift=Math.sin(tl*1.2)*(PORT?W*0.006:U*0.008);
  var sc=U*0.30;
- // холодная гранатная (fist) — лево-низ
  var fx=PORT?W*0.26:W*0.40, fy=PORT?H*0.62:H*0.66;
  if(!PORT){
   ctx.strokeStyle=COLD;ctx.lineWidth=sc*0.22;ctx.lineCap='round';
@@ -115,14 +114,12 @@ function drawShot2(tl){
  }
  hand(fx,fy,0.05,sc,COLD,'fist',false);
  ci(fx+sc*0.20,fy+sc*0.07,sc*0.17,POME);
- // холодная свободная (open) — право-низ
  var ox=PORT?W*0.60:W*0.52, oy=PORT?H*0.56:H*0.58;
  if(!PORT){
   ctx.strokeStyle=COLD;ctx.lineWidth=sc*0.22;ctx.lineCap='round';
   ctx.beginPath();ctx.moveTo(ox,oy+sc*0.3);ctx.lineTo(ox+sc*0.1,H*0.80);ctx.stroke();
  }
  hand(ox,oy,-0.12,sc,COLD,'open',false);
- // тёплая рука спускается СВЕРХУ ВНИЗ и накрывает — пальцы вниз (grab)
  var low=Math.min(1,tl/1.6);
  var wx=ox, wyS=PORT?H*0.18:H*0.20, wyE=oy-sc*0.5;
  var wy=wyS+low*(wyE-wyS);
@@ -204,43 +201,6 @@ function drawShot3(tl){
  if(Math.random()<0.05)crumbSpawn(PORT?W*0.46:W*0.50,H*0.78,1);
  crumbDraw();
 }
- hand(hx,hy,-0.10,sc,COLD,'open',false);
-
- // плечо Артемиды
- ctx.fillStyle='#6f6a4f';
- ctx.beginPath();
- ctx.moveTo(PORT?W*0.62:W*0.66,H*0.10);
- ctx.lineTo(PORT?W*0.80:W*0.86,H*0.17);
- ctx.lineTo(PORT?W*0.72:W*0.78,H*0.32);
- ctx.lineTo(PORT?W*0.58:W*0.60,H*0.25);
- ctx.closePath();
- ctx.fill();
-
- // голова Артемиды: наклонена к Персефоне, глаз открыт
- ctx.save();
- ctx.translate(PORT?W*0.66:W*0.70,H*0.12);
- ctx.rotate(-0.45);
- ctx.fillStyle='#d8b89a';
- ctx.beginPath();ctx.ellipse(0,0,gh,gh*1.16,0,0,PI2);ctx.fill();
- ctx.fillStyle='#d9c98f';
- ctx.beginPath();ctx.arc(0,-gh*0.1,gh*1.1,Math.PI*0.95,Math.PI*2.05);ctx.fill();
- ctx.beginPath();ctx.arc(gh*0.9,gh*0.2,gh*0.44,0,PI2);ctx.fill();
- ctx.fillStyle='#241d1a';
- ci(-gh*0.44,gh*0.24,gh*0.12,'#241d1a');
- ctx.restore();
-
- // тёплая рука ТЯНЕТ — пальцы вниз (grab); на телефоне без предплечья
- var ex=hx, ey=hy-sc*0.45;
- if(!PORT){
-  ctx.strokeStyle=WARM;ctx.lineWidth=sc*0.26;ctx.lineCap='round';
-  ctx.beginPath();ctx.moveTo(W*0.70,H*0.22);ctx.lineTo(ex,ey);ctx.stroke();
- }
- hand(ex,ey,0.12,sc,WARM,'grab',true);
- moon(PORT?W*0.68:W*0.68,PORT?H*0.24:H*0.20,gh*0.4);
-
- if(Math.random()<0.05)crumbSpawn(PORT?W*0.46:W*0.50,H*0.78,1);
- crumbDraw();
-}
 
 function drawShot4(tl){
  morningSky();
@@ -254,7 +214,6 @@ function drawShot4(tl){
  var s=PORT?W*0.0032:U*0.0026;
  var fy=H*0.80, ax=PORT?W*0.42:W*0.47, px=PORT?W*0.58:W*0.53, tilt=PORT?-0.09:-0.16;
 
- // Персефона: прислонилась, гранат всё ещё сжат
  ctx.save();
  ctx.translate(px,fy);
  ctx.rotate(tilt);
@@ -277,7 +236,6 @@ function drawShot4(tl){
  ci(20*s,-92*s,7*s,POME);
  ctx.restore();
 
- // Артемида рядом, придерживает за плечо
  ctx.fillStyle='#6f6a4f';
  ctx.beginPath();
  ctx.moveTo(ax-26*s,fy-150*s+10*s);
@@ -290,7 +248,15 @@ function drawShot4(tl){
  ctx.fillStyle='#d9c98f';
  ctx.beginPath();ctx.arc(ax,fy-172*s,17*s,Math.PI,0);ctx.fill();
  moon(ax,fy-132*s,5*s);
- hand(ax+18*s,fy-126*s,-0.35,15*s,WARM,'cover',false);
+
+ if(PORT){
+  var tx=px-22*s, ty=fy-138*s;
+  ctx.strokeStyle=WARM;ctx.lineWidth=15*s*0.9;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(ax+22*s,fy-128*s);ctx.lineTo(tx,ty);ctx.stroke();
+  hand(tx,ty,-0.2,15*s,WARM,'cover',false);
+ }else{
+  hand(ax+18*s,fy-126*s,-0.35,15*s,WARM,'cover',false);
+ }
 
  petalDraw();
 }
