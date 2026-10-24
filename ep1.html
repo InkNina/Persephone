@@ -104,89 +104,106 @@ function drawShot1(tl){
 
 function drawShot2(tl){
  earthDark();resetClods();soilBand();
- var drift=Math.sin(tl*1.2)*U*0.008,sc=U*0.30;
- hand(W*0.40,H*0.66+drift,0.05,sc,COLD,'fist',false);
- ci(W*0.40+sc*0.20,H*0.66+drift+sc*0.07,sc*0.17,POME);
- hand(W*0.52,H*0.58-drift,-0.12,sc,COLD,'open',false);
- var low=Math.min(1,tl/1.6),wy=H*0.30+low*U*0.22;
- hand(W*0.52,wy,0.12,sc,WARM,'grab',true);
- moon(W*0.52,wy-sc*0.45,sc*0.07);
+ var PORT=H>W;
+ var drift=Math.sin(tl*1.2)*(PORT?W*0.006:U*0.008);
+ var sc=PORT?W*0.14:U*0.30;
+ // холодная гранатная (fist) — лево-низ, предплечье в землю
+ var fx=PORT?W*0.28:W*0.40, fy=PORT?H*0.64:H*0.66;
+ ctx.strokeStyle=COLD;ctx.lineWidth=sc*0.22;ctx.lineCap='round';
+ ctx.beginPath();ctx.moveTo(fx,fy+sc*0.3);ctx.lineTo(fx-sc*0.1,H*0.80);ctx.stroke();
+ hand(fx,fy,0.05,sc,COLD,'fist',false);
+ ci(fx+sc*0.20,fy+sc*0.07,sc*0.17,POME);
+ // холодная свободная (open) — право-низ, предплечье в землю
+ var ox=PORT?W*0.56:W*0.52, oy=PORT?H*0.58:H*0.58;
+ ctx.strokeStyle=COLD;ctx.lineWidth=sc*0.22;ctx.lineCap='round';
+ ctx.beginPath();ctx.moveTo(ox,oy+sc*0.3);ctx.lineTo(ox+sc*0.1,H*0.80);ctx.stroke();
+ hand(ox,oy,-0.12,sc,COLD,'open',false);
+ // тёплая cover сверху-право, кисть накрывает open, предплечье вверх
+ var low=Math.min(1,tl/1.6);
+ var wx=ox+sc*0.06, wy=(PORT?H*0.28:H*0.30)+low*(PORT?W*0.14:U*0.22);
+ ctx.strokeStyle=WARM;ctx.lineWidth=sc*0.24;ctx.lineCap='round';
+ ctx.beginPath();ctx.moveTo(wx,wy-sc*0.3);ctx.lineTo(wx+sc*0.7,PORT?H*0.05:H*0.10);ctx.stroke();
+ hand(wx,wy,0.12,sc,WARM,'cover',true);
+ moon(wx+sc*0.10,wy-sc*0.45,sc*0.07);
 }
 
 function drawShot3(tl){
  earthDark();resetClods();soilBand();
+ var PORT=H>W;
  topGlow(0.22+tl*0.05);
- var rise=tl*U*0.02,sc=U*0.24;
+ var rise=tl*(PORT?W*0.012:U*0.02);
+ var sc=PORT?W*0.16:U*0.24;
+ var gh=PORT?W*0.042:U*0.05;
 
- // тело Персефоны поднимается из земли
+ // тело Персефоны поднимается из земли (масштаб от sc)
  ctx.save();
- ctx.translate(W*0.48,H*0.78-rise*0.25);
+ ctx.translate(PORT?W*0.40:W*0.48,H*0.78-rise*0.25);
  ctx.rotate(-0.12);
  ctx.fillStyle='#3a3a40';
  ctx.beginPath();
- ctx.moveTo(-U*0.08,U*0.04);
- ctx.lineTo(U*0.08,U*0.04);
- ctx.lineTo(U*0.055,-U*0.16);
- ctx.lineTo(-U*0.055,-U*0.16);
+ ctx.moveTo(-sc*0.33,sc*0.16);
+ ctx.lineTo(sc*0.33,sc*0.16);
+ ctx.lineTo(sc*0.23,-sc*0.66);
+ ctx.lineTo(-sc*0.23,-sc*0.66);
  ctx.closePath();
  ctx.fill();
  ctx.restore();
 
  // голова Персефоны: запрокинута, висит, глаза закрыты, грязная бини
- ctx.strokeStyle='#c9bba0';ctx.lineWidth=U*0.03;ctx.lineCap='round';
- ctx.beginPath();ctx.moveTo(W*0.46,H*0.62-rise*0.25);ctx.lineTo(W*0.45,H*0.585-rise*0.3);ctx.stroke();
+ ctx.strokeStyle='#c9bba0';ctx.lineWidth=gh*0.6;ctx.lineCap='round';
+ ctx.beginPath();ctx.moveTo(PORT?W*0.40:W*0.46,H*0.62-rise*0.25);ctx.lineTo(PORT?W*0.38:W*0.45,H*0.585-rise*0.3);ctx.stroke();
  ctx.save();
- ctx.translate(W*0.45,H*0.56-rise*0.3);
+ ctx.translate(PORT?W*0.37:W*0.45,H*0.56-rise*0.3);
  ctx.rotate(0.32);
  ctx.fillStyle='#c9bba0';
- ctx.beginPath();ctx.ellipse(0,0,U*0.045,U*0.055,0,0,PI2);ctx.fill();
+ ctx.beginPath();ctx.ellipse(0,0,gh,gh*1.2,0,0,PI2);ctx.fill();
  ctx.fillStyle='#241d1a';
- ctx.beginPath();ctx.arc(0,-U*0.01,U*0.05,Math.PI*1.05,Math.PI*1.95);ctx.fill();
+ ctx.beginPath();ctx.arc(0,-gh*0.2,gh*1.1,Math.PI*1.05,Math.PI*1.95);ctx.fill();
  ctx.fillStyle='#2c2c31';
- ctx.fillRect(-U*0.05,-U*0.02,U*0.10,U*0.018);
+ ctx.fillRect(-gh,-gh*0.4,gh*2,gh*0.35);
  ctx.strokeStyle='#241d1a';ctx.lineWidth=1.4*DPR;
- ctx.beginPath();ctx.moveTo(-U*0.022,U*0.008);ctx.lineTo(-U*0.008,U*0.010);ctx.stroke();
- ctx.beginPath();ctx.moveTo(U*0.008,U*0.010);ctx.lineTo(U*0.022,U*0.008);ctx.stroke();
+ ctx.beginPath();ctx.moveTo(-gh*0.5,gh*0.15);ctx.lineTo(-gh*0.18,gh*0.18);ctx.stroke();
+ ctx.beginPath();ctx.moveTo(gh*0.18,gh*0.18);ctx.lineTo(gh*0.5,gh*0.15);ctx.stroke();
  ctx.restore();
 
  // холодное предплечье и кисть Персефоны
- var hx=W*0.55,hy=H*0.50-rise;
- ctx.strokeStyle=COLD;ctx.lineWidth=U*0.035;ctx.lineCap='round';
- ctx.beginPath();ctx.moveTo(W*0.50,H*0.66-rise*0.35);ctx.lineTo(hx,hy+sc*0.25);ctx.stroke();
+ var hx=PORT?W*0.50:W*0.55, hy=H*0.50-rise;
+ ctx.strokeStyle=COLD;ctx.lineWidth=sc*0.22;ctx.lineCap='round';
+ ctx.beginPath();ctx.moveTo(PORT?W*0.44:W*0.50,H*0.66-rise*0.35);ctx.lineTo(hx,hy+sc*0.25);ctx.stroke();
  hand(hx,hy,-0.10,sc,COLD,'open',false);
 
  // плечо Артемиды
  ctx.fillStyle='#6f6a4f';
  ctx.beginPath();
- ctx.moveTo(W*0.66,H*0.08);
- ctx.lineTo(W*0.86,H*0.16);
- ctx.lineTo(W*0.78,H*0.34);
- ctx.lineTo(W*0.60,H*0.24);
+ ctx.moveTo(PORT?W*0.60:W*0.66,H*0.08);
+ ctx.lineTo(PORT?W*0.82:W*0.86,H*0.16);
+ ctx.lineTo(PORT?W*0.74:W*0.78,H*0.34);
+ ctx.lineTo(PORT?W*0.56:W*0.60,H*0.24);
  ctx.closePath();
  ctx.fill();
 
- // голова Артемиды: наклонена к Персефоне, глаз открыт, смотрит вниз-влево
- ctx.strokeStyle='#d8b89a';ctx.lineWidth=U*0.035;ctx.lineCap='round';
- ctx.beginPath();ctx.moveTo(W*0.72,H*0.16);ctx.lineTo(W*0.70,H*0.12);ctx.stroke();
+ // голова Артемиды: наклонена к Персефоне, глаз открыт
+ ctx.strokeStyle='#d8b89a';ctx.lineWidth=gh*0.7;ctx.lineCap='round';
+ ctx.beginPath();ctx.moveTo(PORT?W*0.66:W*0.72,H*0.16);ctx.lineTo(PORT?W*0.64:W*0.70,H*0.12);ctx.stroke();
  ctx.save();
- ctx.translate(W*0.70,H*0.10);
+ ctx.translate(PORT?W*0.64:W*0.70,H*0.10);
  ctx.rotate(-0.45);
  ctx.fillStyle='#d8b89a';
- ctx.beginPath();ctx.ellipse(0,0,U*0.05,U*0.058,0,0,PI2);ctx.fill();
+ ctx.beginPath();ctx.ellipse(0,0,gh,gh*1.16,0,0,PI2);ctx.fill();
  ctx.fillStyle='#d9c98f';
- ctx.beginPath();ctx.arc(0,-U*0.005,U*0.055,Math.PI*0.95,Math.PI*2.05);ctx.fill();
- ctx.beginPath();ctx.arc(U*0.045,U*0.01,U*0.022,0,PI2);ctx.fill();
+ ctx.beginPath();ctx.arc(0,-gh*0.1,gh*1.1,Math.PI*0.95,Math.PI*2.05);ctx.fill();
+ ctx.beginPath();ctx.arc(gh*0.9,gh*0.2,gh*0.44,0,PI2);ctx.fill();
  ctx.fillStyle='#241d1a';
- ci(-U*0.022,U*0.012,U*0.006,'#241d1a');
+ ci(-gh*0.44,gh*0.24,gh*0.12,'#241d1a');
  ctx.restore();
 
  // тёплая рука Артемиды тянет холодное запястье (поверх)
- ctx.strokeStyle=WARM;ctx.lineWidth=U*0.04;ctx.lineCap='round';
- ctx.beginPath();ctx.moveTo(W*0.70,H*0.22);ctx.lineTo(hx+sc*0.05,hy-sc*0.20);ctx.stroke();
+ ctx.strokeStyle=WARM;ctx.lineWidth=sc*0.26;ctx.lineCap='round';
+ ctx.beginPath();ctx.moveTo(PORT?W*0.66:W*0.70,H*0.22);ctx.lineTo(hx+sc*0.05,hy-sc*0.20);ctx.stroke();
  hand(hx+sc*0.02,hy-sc*0.18,0.20,sc*0.85,WARM,'cover',false);
- moon(W*0.70,H*0.25,U*0.02);
+ moon(PORT?W*0.66:W*0.70,H*0.25,gh*0.4);
 
- if(Math.random()<0.05)crumbSpawn(W*0.50+(Math.random()-0.5)*W*0.12,H*0.78,1);
+ if(Math.random()<0.05)crumbSpawn(PORT?W*0.46:W*0.50,H*0.78,1);
  crumbDraw();
 }
 
@@ -198,7 +215,9 @@ function drawShot4(tl){
  tree(W*0.70,0.95,4.4,H*0.80);
  tree(W*0.92,1.1,3.7,H*0.80);
 
- var s=U*0.0026,fy=H*0.80,ax=W*0.47,px=W*0.53,tilt=-0.16;
+ var PORT=H>W;
+ var s=PORT?W*0.0032:U*0.0026;
+ var fy=H*0.80, ax=PORT?W*0.34:W*0.47, px=PORT?W*0.66:W*0.53, tilt=PORT?-0.05:-0.16;
 
  // Персефона: прислонилась, гранат всё ещё сжат
  ctx.save();
