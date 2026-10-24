@@ -59,7 +59,7 @@ function hand(cx,cy,ang,sc,col,pose,mir){
  var f=[],i;
  if(pose==='grab'){
   for(i=0;i<4;i++)f.push([-sc*0.18+i*sc*0.12,sc*0.34,Math.PI/2+(i-1.5)*FAN,sc*0.30,0.9,sc*0.16]);
-  f.push([-sc*0.26,-sc*0.04,Math.PI/2,sc*0.26,TBEND,sc*0.13]);
+  f.push([-sc*0.26,-sc*0.04,Math.PI/2,sc*0.26,-TBEND,sc*0.13]);
  }else if(pose==='open'){
   for(i=0;i<4;i++)f.push([-sc*0.18+i*sc*0.12,-sc*0.34,-Math.PI/2+(i-1.5)*0.22,sc*0.34,0,0]);
   f.push([-sc*0.26,sc*0.02,Math.PI+0.5,sc*0.24,0,0]);
