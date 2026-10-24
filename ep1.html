@@ -48,14 +48,13 @@ window.addEventListener('touchstart',function(){wake();},{passive:true});
 function ln(x1,y1,x2,y2,w,col){ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
 function ci(x,y,r,col){ctx.fillStyle=col;ctx.beginPath();ctx.arc(x,y,r,0,PI2);ctx.fill();}
 
-// КИСТЬ: ладонь-овал; 4 пальца веером с НИЖНЕГО края; большой палец с ПРОТИВОПОЛОЖНОГО (левого) края, толще и короче.
+// КИСТЬ: ладонь-овал; 4 пальца веером с НИЖНЕГО края; большой палец с ПРАВОГО края, ПРИЖАТ, ВНИЗ (клешня хвата), кончик чуть внутрь.
 // mir=true даёт вторую руку зеркалом. pose: open|grab|cover|fist.
 function hand(cx,cy,ang,sc,col,pose,mir){
  ctx.save();ctx.translate(cx,cy);ctx.rotate(ang);if(mir)ctx.scale(-1,1);
  ctx.fillStyle=col;ctx.strokeStyle=col;ctx.lineCap='round';ctx.lineJoin='round';
  ctx.beginPath();ctx.ellipse(0,0,sc*0.26,sc*0.40,0,0,PI2);ctx.fill();
  var i,fb=sc*0.32;
- // четыре пальца с нижнего края, лёгкий веер; в grab/fist концы сводятся к центру (чаша)
  for(i=0;i<4;i++){
   var fx=-sc*0.16+i*sc*0.107;
   var fa=Math.PI/2+(i-1.5)*0.10;
@@ -70,14 +69,14 @@ function hand(cx,cy,ang,sc,col,pose,mir){
   }
   ctx.stroke();
  }
- // БОЛЬШОЙ ПАЛЕЦ — с левого края ладони (противоположный внешнему пальцу), толстый, короткий
+ // БОЛЬШОЙ ПАЛЕЦ — правый край ладони, прижат, ВНИЗ, как красный эталон (клешня), кончик внутрь.
  ctx.lineWidth=sc*0.13;
- var tx=-sc*0.25,ty=-sc*0.05;
+ var tx=sc*0.24, ty=-sc*0.02;
  ctx.beginPath();ctx.moveTo(tx,ty);
- if(pose==='open'){ctx.lineTo(tx-sc*0.22,ty-sc*0.12);}
- else if(pose==='grab'){ctx.lineTo(tx-sc*0.12,ty+sc*0.20);ctx.lineTo(tx+sc*0.05,ty+sc*0.28);}
- else if(pose==='cover'){ctx.lineTo(tx-sc*0.20,ty+sc*0.04);}
- else if(pose==='fist'){ctx.lineTo(tx+sc*0.04,ty+sc*0.16);}
+ if(pose==='open'){ctx.lineTo(sc*0.34,sc*0.06);}
+ else if(pose==='grab'){ctx.lineTo(sc*0.28,sc*0.14);ctx.lineTo(sc*0.19,sc*0.23);}
+ else if(pose==='cover'){ctx.lineTo(sc*0.27,sc*0.12);}
+ else if(pose==='fist'){ctx.lineTo(sc*0.22,sc*0.14);}
  ctx.stroke();
  ctx.restore();
 }
@@ -98,7 +97,7 @@ function drawShot1(tl){
  earthDark();soilBand();
  var cyc=1.25,idx=Math.floor(tl/cyc),ph=(tl%cyc)/cyc,active=idx%2;
  var swing=Math.sin(ph*Math.PI),sc=U*0.30,topY=H*0.30,reach=swing*U*0.05;
- // КНОПКА РАЗВОРОТА ПАРЫ: левая -(..), правая +(..) + mir. Поменяй оба знака -> пальцы наружу, большие внутрь.
+ // КНОПКА РАЗВОРОТА ПАРЫ: левая -(..), правая +(..) + mir. Поменяй оба знака -> пара развернётся.
  if(active===0){
   var lx=W*0.38,ly=topY+reach;
   hand(lx,ly,-(0.12+swing*0.18),sc,WARM,'grab',false);
