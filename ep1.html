@@ -197,11 +197,12 @@ function drawShot3(tl){
  ci(-gh*0.44,gh*0.24,gh*0.12,'#241d1a');
  ctx.restore();
 
- // тёплая рука Артемиды тянет холодное запястье (поверх)
+ // тёплая рука Артемиды ТЯНЕТ — пальцы вниз (grab, как в первых вариантах), а не лежит вбок
+ var ex=hx, ey=hy-sc*0.45;
  ctx.strokeStyle=WARM;ctx.lineWidth=sc*0.26;ctx.lineCap='round';
- ctx.beginPath();ctx.moveTo(PORT?W*0.66:W*0.70,H*0.22);ctx.lineTo(hx+sc*0.05,hy-sc*0.20);ctx.stroke();
- hand(hx+sc*0.02,hy-sc*0.18,0.20,sc*0.85,WARM,'cover',false);
- moon(PORT?W*0.66:W*0.70,H*0.25,gh*0.4);
+ ctx.beginPath();ctx.moveTo(PORT?W*0.70:W*0.70,PORT?H*0.26:H*0.22);ctx.lineTo(ex,ey);ctx.stroke();
+ hand(ex,ey,0.12,sc,WARM,'grab',true);
+ moon(PORT?W*0.68:W*0.68,PORT?H*0.24:H*0.20,gh*0.4);
 
  if(Math.random()<0.05)crumbSpawn(PORT?W*0.46:W*0.50,H*0.78,1);
  crumbDraw();
