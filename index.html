@@ -59,6 +59,7 @@ function melodyScheduler(){
 }
 function startMelody(){
   if(melTimer)return;
+  if(actx.state==='suspended')actx.resume();
   melNext=actx.currentTime+0.15;
   melTimer=setInterval(melodyScheduler,25);
 }
@@ -68,12 +69,14 @@ function wake(){
     actx=new AC();
     if(actx.state==='suspended')actx.resume();
     startWind();
-    setTimeout(function(){if(actx.state==='suspended')actx.resume();startMelody();},150);
+    startMelody();
   }catch(e){}
 }
 
 function act(){wake();if(phase==='meet'&&t-meetT>1.3)giveReq=true;}
 window.addEventListener('click',act);
+window.addEventListener('pointerdown',act);
+window.addEventListener('touchend',act);
 window.addEventListener('touchstart',function(e){act();},{passive:true});
 window.addEventListener('keydown',function(e){if(e.code==='Space'){e.preventDefault();act();}});
 
