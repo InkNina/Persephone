@@ -26,6 +26,10 @@ var PI2=Math.PI*2;
 var audioOn=false,windOn=false,stepParity=0,prevWalkArg=0,bushExitPlayed=false,bobPhase=0,bobAmp=1,bobFrozen=false;
 var AC=window.AudioContext||window.webkitAudioContext,actx=null;
 
+// ---- мелодия: фраза [частота Гц, длительность в долях такта], 0 = пауза ----
+var MELODY=[[440,1],[523.25,1],[587.33,2],[0,1],[659.25,1],[587.33,1],[523.25,2],[0,2],[440,1],[523.25,1],[440,3],[0,3]];
+var BEAT=0.5, melIdx=0, melNext=0, melTimer=null;
+
 function newPetal(rand){return{nx:Math.random(),ny:rand?Math.random():-0.03,vx:(Math.random()-0.5)*0.0009,vy:0.0009+Math.random()*0.0016,rn:0.0014+Math.random()*0.0026,a:Math.random()*PI2,va:(Math.random()-0.5)*0.05};}
 var petals=[];for(var i=0;i<80;i++)petals.push(newPetal(true));
 
