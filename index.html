@@ -8,11 +8,34 @@
 html,body{margin:0;height:100%;background:#e9e1d2;overflow:hidden;font-family:Georgia,serif}
 canvas{display:block;width:100vw;height:100vh}
 #ok{position:fixed;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#9e2b2b;font-size:28px;background:#e9e1d2;z-index:9}
+
+.back-home{
+  position:fixed;
+  top:clamp(14px,2.4vh,26px);
+  left:clamp(14px,2.4vw,26px);
+  z-index:10;
+  color:#7d7562;
+  text-decoration:none;
+  font-family:Georgia,serif;
+  font-size:13px;
+  letter-spacing:1px;
+  padding:7px 12px;
+  border:1px solid rgba(125,117,98,.55);
+  background:rgba(233,225,210,.82);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .9s ease,background .25s ease,color .25s ease,border-color .25s ease;
+}
+.back-home.show{opacity:1;pointer-events:auto}
+.back-home:hover{background:rgba(233,225,210,.96);color:#3a3326;border-color:#b9a24a}
+
 </style>
 </head>
 <body>
 <div id="ok">KOD DOSHEL? ESLI VIDISH ETU NAPIS - NET.</div>
 <canvas id="c"></canvas>
+<a id="backHome" class="back-home" href="https://inknina.github.io/Moscow-between/prolog.html">← на пролог</a>
+
 <script>
 var cv=document.getElementById('c'),ctx=cv.getContext('2d');
 var okEl=document.getElementById('ok');if(okEl)okEl.style.display='none';
@@ -183,7 +206,13 @@ bush(W*(1.174-(0.62-towerX)*3.0));
 persephone(px,fy,bob,phase==='give');
 artemis(ax,fy,bob);
 petalsDraw();
-if(phase==='walk'){if(!sub)setSub('Яблони в цвету. Высотка смотрит сверху.');if(t>7){phase='meet';meetT=t;bushExitPlayed=false;bobFrozen=true;shush(0.5,2600,0.12);}}else if(phase==='meet'){if(giveReq){phase='give';giveT=t;setSub('Персефона отдаёт гранат. Без слов.');}}else if(phase==='give'){if(t-giveT>1.6){phase='run';runT=t;shush(0.25,1800,0.18);}}else if(phase==='run'){if(t-runT>2.0&&!bushExitPlayed){bushExitPlayed=true;shush(0.5,2600,0.12);}if(t-runT>2.6){phase='end';setSub('Знак приняли. Дальше их дорога.');}}
+if(phase==='walk'){if(!sub)setSub('Яблони в цвету. Высотка смотрит сверху.');if(t>7){phase='meet';meetT=t;bushExitPlayed=false;bobFrozen=true;shush(0.5,2600,0.12);}}else if(phase==='meet'){if(giveReq){phase='give';giveT=t;setSub('Персефона отдаёт гранат. Без слов.');}}else if(phase==='give'){if(t-giveT>1.6){phase='run';runT=t;shush(0.25,1800,0.18);}}else if(phase==='run'){if(t-runT>2.0&&!bushExitPlayed){bushExitPlayed=true;shush(0.5,2600,0.12);}if(t-runT>2.6){
+  phase='end';
+  setSub('Знак приняли. Дальше их дорога.');
+  var b=document.getElementById('backHome');
+  if(b) setTimeout(function(){b.classList.add('show');},400);
+}
+
 drawCaptions();requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
 </script>
